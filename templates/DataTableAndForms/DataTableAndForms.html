@@ -1,0 +1,464 @@
+{% load static zx_quick_create %}
+{% load custom_filters %}
+<!DOCTYPE html>
+<html lang="en">
+{% include 'partials/_header.html' %}
+<body class="hold-transition sidebar-mini">
+<div class="wrapper">
+  <!-- Navbar -->
+  <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+    <!-- Left navbar links -->
+    {% include 'partials/_right_sidebar_links.html' %}
+
+    <!-- Right navbar links -->
+    {% include 'partials/_right_sidebar.html' %}
+  </nav>
+  <!-- /.navbar -->
+
+  <!-- Main Sidebar Container -->
+  <aside class="main-sidebar sidebar-dark-primary elevation-4">
+    <!-- Brand Logo -->
+    {% include 'partials/_brand_logo.html' %}
+
+    <!-- Sidebar -->
+    {% include 'partials/_left_sidebar.html' %}
+    <!-- /.sidebar -->
+  </aside>
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    {% include 'partials/_left_sidebar_links.html' %}
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="container-fluid">
+        {% include 'partials/_messages.html' %}
+<!--          <div class="card-header d-flex justify-content-end">-->
+<!--          </div>-->
+        <div class="row">
+          <div class="col-md-12">
+            <div class="card">
+              <!-- /.card-header -->
+              <div class="card-body">
+                {% if permission_view %}
+                  {% include 'partials/_form_search.html' %}
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                {% for coluna in colunas %}
+                                    {% if coluna.nome == 'acoes' and permission_edit %}
+                                        <th style="width: {{ coluna.largura }}">{{ coluna.label }}</th>
+                                    {% elif coluna.nome == 'acoes' %}
+
+                                    {% else %}
+                                        <th style="width: {{ coluna.largura }}">{{ coluna.label }}</th>
+                                    {% endif %}
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for dado in dados_paginados %}
+                                <tr>
+                                    {% for coluna in colunas %}
+                                        {% if coluna.nome == 'acoes' and permission_edit %}
+                                            <td>
+                                                <a href="{{ dado.editar_url }}">
+                                                    <button type="button" class="btn btn-block btn-info btn-sm">Ações</button>
+                                                </a>
+                                            </td>
+                                        {% elif coluna.nome == 'acoes' %}
+
+                                        {% elif coluna.nome == 'historico' %}
+                                            <td>
+                                                <a href="{{ dado.history_rout }}">
+                                                    <button type="button" class="btn btn-block btn-secondary btn-sm">{{ coluna.label }}</button>
+                                                </a>
+                                            </td>
+
+                                        {% elif coluna.nome == 'gerente' %}
+                                            <td>
+                                                {% for gerentes in dado.gerente.all %}
+                                                    {{ gerentes }}</br>
+                                                {% endfor %}
+                                            </td>
+                                        {% elif coluna.nome == 'diasaseremrealizado' %}
+                                            <td>
+                                                {% for dias_semana in dado.diasaseremrealizado.all %}
+                                                    {{ dias_semana }}</br>
+                                                {% endfor %}
+                                            </td>
+                                        {% elif coluna.nome == 'setor' %}
+                                            <td>
+                                                {% for setor in dado.setor.all %}
+                                                    {{ setor }}</br>
+                                                {% endfor %}
+                                            </td>
+                                        {% elif coluna.nome == 'empresasecundaria' %}
+                                            <td>
+                                                {% for empresasec in dado.empresasecundaria.all %}
+                                                    {{ empresasec }}</br>
+                                                {% endfor %}
+                                            </td>
+                                        {% elif coluna.nome == 'EmpresaSecundaria' %}
+                                            <td>
+                                                {{ dado|get_item:coluna.nome }}</br>
+                                            </td>
+                                        {% elif coluna.nome == 'ServicosEscalados' %}
+                                            <td>
+                                                {% for servico in dado.ServicosEscalados.all %}
+                                                    {{ servico }}</br>
+                                                {% endfor %}
+                                            </td>
+                                        {% elif coluna.nome == 'ColaboradoresEscalados' %}
+                                            <td>
+                                                {% for colaborador in dado.ColaboradoresEscalados.all %}
+                                                    {{ colaborador }}</br>
+                                                {% endfor %}
+                                            </td>
+                                        {% elif coluna.nome == 'ColaboradoresConfirmados' %}
+                                            <td>
+                                                {% for colaborador in dado.ColaboradoresConfirmados.all %}
+                                                    {{ colaborador }}</br>
+                                                {% endfor %}
+                                            </td>
+                                        {% elif coluna.nome == 'ColaboradoresNegados' %}
+                                            <td>
+                                                {% for colaborador in dado.ColaboradoresNegados.all %}
+                                                    {{ colaborador }}</br>
+                                                {% endfor %}
+                                            </td>
+                                        {% elif coluna.nome == 'Permissions' %}
+                                            <td>
+                                                {% for permission in dado.Permissions.all %}
+                                                    {{ permission }},
+                                                {% endfor %}
+                                            </td>
+                                        {% elif coluna.nome == 'status' or coluna.nome == 'status_servico' %}
+                                            {% if dado|get_item:coluna.nome == "Desmobilizado" and coluna.nome == "status" %}
+                                                <td>
+                                                    <span class="badge bg-warning">
+                                                        {{ dado|get_item:coluna.nome }}
+                                                    </span>
+                                                </td>
+                                            {% elif dado|get_item:coluna.nome == "Concluido" and coluna.nome == "status" %}
+                                                <td>
+                                                    <span class="badge" style="background-color: #020d3f; color: white;">
+                                                        {{ dado|get_item:coluna.nome }}
+                                                    </span>
+                                                </td>
+                                            {% elif dado|get_item:coluna.nome == "Mobilizado" and coluna.nome == "status" %}
+                                                <td>
+                                                    <span class="badge bg-success">
+                                                        {{ dado|get_item:coluna.nome }}
+                                                    </span>
+                                                </td>
+                                            {% elif dado|get_item:coluna.nome == "Pendente" %}
+                                                <td>
+                                                    <span class="badge bg-warning">
+                                                        {{ dado|get_item:coluna.nome }}
+                                                    </span>
+                                                </td>
+                                            {% elif dado|get_item:coluna.nome == "Concluído" or dado|get_item:coluna.nome == "Aprovado" %}
+                                                <td>
+                                                    <span class="badge bg-success">
+                                                        {{ dado|get_item:coluna.nome }}
+                                                    </span>
+                                                </td>
+                                            {% elif dado|get_item:coluna.nome == "Rejeitado" %}
+                                                <td>
+                                                    <span class="badge bg-danger">
+                                                        {{ dado|get_item:coluna.nome }}
+                                                    </span>
+                                                </td>
+                                            {% else %}
+                                                <td>
+                                                    <span class="badge" style="background-color: #020d3f; color: white;">
+                                                        {{ dado|get_item:coluna.nome }}
+                                                    </span>
+                                                </td>
+                                            {% endif %}
+                                        {% elif coluna.nome == 'novo_status' %}
+                                            {% if dado|get_item:coluna.nome == "Próximo" %}
+                                                <td>
+                                                    <span class="badge bg-warning">
+                                                        {{ dado|get_item:coluna.nome }}
+                                                    </span>
+                                                </td>
+                                            {% elif dado|get_item:coluna.nome == "Em andamento" %}
+                                                <td>
+                                                    <span class="badge bg-success">
+                                                        {{ dado|get_item:coluna.nome }}
+                                                    </span>
+                                                </td>
+                                            {% elif dado|get_item:coluna.nome == "Agendado" %}
+                                                <td>
+                                                    <span class="badge bg-info">
+                                                        {{ dado|get_item:coluna.nome }}
+                                                    </span>
+                                                </td>
+                                            {% elif dado|get_item:coluna.nome == "Atrasado" %}
+                                                <td>
+                                                    <span class="badge bg-danger">
+                                                        {{ dado|get_item:coluna.nome }}
+                                                    </span>
+                                                </td>
+                                            {% else %}
+                                                <td>
+                                                    <span>
+                                                        {{ dado|get_item:coluna.nome }}
+                                                    </span>
+                                                </td>
+                                            {% endif %}
+                                        {% elif coluna.nome == 'dias_restantes' %}
+                                            {% if dado.Periodicidade == "Quinzenal" and dado.dias_restantes > 3 or dado.Periodicidade == "Mensal" and dado.dias_restantes > 7 or dado.Periodicidade == "Bimestral" and dado.dias_restantes > 15 or dado.Periodicidade == "Trimestral" and dado.dias_restantes > 15 or dado.Periodicidade == "Semestral" and dado.dias_restantes > 20 or dado.Periodicidade == "Anual" and dado.dias_restantes > 30 %}
+                                                <td>
+                                                    <span class="badge bg-info">
+                                                        {{ dado.dias_restantes }}
+                                                    </span>
+                                                </td>
+                                            {% elif dado.Periodicidade == "Quinzenal" and dado.dias_restantes <= 3 and dado.dias_restantes >= 0 or dado.Periodicidade == "Mensal" and dado.dias_restantes <= 7 and dado.dias_restantes >= 0 or dado.Periodicidade == "Bimestral" and dado.dias_restantes <= 15 and dado.dias_restantes >= 0 or dado.Periodicidade == "Trimestral" and dado.dias_restantes <= 15 and dado.dias_restantes >= 0 or dado.Periodicidade == "Semestral" and dado.dias_restantes <= 20 and dado.dias_restantes >= 0 or dado.Periodicidade == "Anual" and dado.dias_restantes <= 30 and dado.dias_restantes >= 0 %}
+                                                <td>
+                                                    <span class="badge bg-warning">
+                                                        {{ dado.dias_restantes }}
+                                                    </span>
+                                                </td>
+
+                                            {% elif dado.dias_restantes < 0 %}
+                                                <td>
+                                                    <span class="badge bg-danger">
+                                                        {{ dado.dias_restantes }}
+                                                    </span>
+                                                </td>
+                                            {% else %}
+                                                <td>
+                                                    <span>
+                                                        {{ dado.Periodicidade }}
+                                                    </span>
+                                                </td>
+                                            {% endif %}
+                                        {% else %}
+                                            <td>{{ dado|get_item:coluna.nome }}</td>
+                                        {% endif %}
+                                    {% endfor %}
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    </div>
+                {% else %}
+                    {% include 'partials/_access_rejected.html' %}
+                {% endif %}
+              </div>
+              <!-- /.card-body -->
+              <div class="card-body d-flex justify-content-end">
+                  {% if permission_crate %}
+                      {% if modal_button == True %}
+                        <button type="button" class="btn btn-default" data-toggle="modal" data-target="#modal-default">
+                            {{ text_button_open_modal }}
+                        </button>
+                      {% endif %}
+                  {% endif %}
+                  {% if views_on_maps %}
+                      <a href="{{ views_on_maps_url }}">
+                        <button type="button" class="btn btn-default">
+                            Ver no mapa
+                        </button>
+                      </a>
+                  {% endif %}
+                  {% if button_export_tittle != False %}
+                    {% if  permission_view %}
+<!--                      <a href={{ button_export_link }}>-->
+<!--                        <button type="button" class="btn btn-primary">-->
+<!--                            {{ button_export_tittle }}-->
+<!--                        </button>-->
+<!--                      </a>-->
+                          <div class="btn-group">
+                            <div class="btn-group">
+                              <button type="button" class="btn btn-primary dropdown-toggle dropdown-icon" data-toggle="dropdown">
+                                  {{ button_export_tittle }}
+                              </button>
+                              <div class="dropdown-menu">
+                                <a class="dropdown-item" href="{{ button_export_link }}">Relatório simples</a>
+                                <a class="dropdown-item" href="{{ button_export_link_with_checklists }}">Relatório com checklist</a>
+                              </div>
+                            </div>
+                          </div>
+                    {% endif %}
+                  {% endif %}
+              </div>
+                {% if permission_view %}
+                    {% include 'partials/_paginate.html' %}
+                {% endif %}
+              <div class="modal fade" id="modal-default">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h4 class="modal-title">{{ header_model }}</h4>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <form action="{{ url_action }}" method="POST" enctype="multipart/form-data">
+                      <div class="card-body">
+                        <div class="form-group">
+                          {% csrf_token %}
+                          {% zx_quick_create forms %}
+                            <div class="form-group">
+                              {% for field in forms.visible_fields %}
+                                <!-- Identifique o campo 'Permissions' para aplicar a lógica de paginação -->
+                                {% if field.name == 'empresasecundaria' %}
+                                  <div class="form-group">
+                                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                    <!-- Container com checkboxes paginados -->
+                                    <div id="checkbox-container">
+                                      {% for empresa in field %}
+                                        <div class="checkbox-item">
+                                          {{ empresa }}
+                                        </div>
+                                      {% endfor %}
+                                    </div>
+
+                                    <!-- Controles de paginação -->
+                                    <div id="pagination-controls-empresa-operadora">
+                                      <button type="button" id="prev-page-empresa-operadora" onclick="prevPage()" class="btn btn-info">Anterior</button>
+                                      <button type="button" id="next-page-empresa-operadora" onclick="nextPage()" class="btn btn-info">Proximo</button>
+                                    </div>
+                                  </div>
+                                {% elif field.name == 'ServicosEscalados' %}
+                                  <div class="form-group">
+                                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+
+                                    <!-- Container com checkboxes paginados -->
+                                    <div id="checkbox-servicos">
+                                      {% for servico in field %}
+                                        <div class="checkbox-item">
+                                          {{ servico }}
+                                        </div>
+                                      {% endfor %}
+                                    </div>
+
+                                    <!-- Controles de paginação -->
+                                    <div id="pagination-controls-servicos-escalados">
+                                      <button type="button" id="prev-page-servicos-escalados" onclick="prevPage()" class="btn btn-info">Anterior</button>
+                                      <button type="button" id="next-page-servicos-escalados" onclick="nextPage()" class="btn btn-info">Proximo</button>
+                                    </div>
+                                  </div>
+                                {% else %}
+                                  <!-- Renderização normal para outros campos -->
+                                  <div class="form-group">
+                                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                    {{ field }}
+                                  </div>
+                                {% endif %}
+                              {% endfor %}
+                            </div>
+                        <div class="modal-footer justify-content-between">
+                          <button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button>
+                          <button type="POST" class="btn btn-primary">{{ text_button_save }}</button>
+                        </div>
+                      </div>
+                    </form>
+                  </div>
+                  <!-- /.modal-content -->
+                </div>
+                <!-- /.modal-dialog -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+    <!-- /.content -->
+  </div>
+  <!-- /.content-wrapper -->
+  {% include 'partials/_footer.html' %}
+
+  <!-- Control Sidebar -->
+  <aside class="control-sidebar control-sidebar-dark">
+    <!-- Control sidebar content goes here -->
+  </aside>
+  <!-- /.control-sidebar -->
+</div>
+<!-- ./wrapper -->
+
+<script>
+    document.getElementById('toggle-button').onclick = function() {
+        var container = document.getElementById('checkbox-container');
+        if (container.style.display === 'none') {
+            container.style.display = 'block';
+        } else {
+            container.style.display = 'none';
+        }
+    };
+</script>
+
+<script>
+  const itemsPerPage = 5;
+  let currentPage = 1;
+
+  function paginate() {
+    const items = document.querySelectorAll('.checkbox-item');
+    const totalItems = items.length;
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+    items.forEach((item, index) => {
+      item.style.display = (index >= (currentPage - 1) * itemsPerPage && index < currentPage * itemsPerPage) ? 'block' : 'none';
+    });
+
+    document.getElementById('prev-page-servicos-escalados').style.display = (currentPage === 1) ? 'none' : 'inline';
+    document.getElementById('next-page-servicos-escalados').style.display = (currentPage === totalPages) ? 'none' : 'inline';
+  }
+
+  function nextPage() {
+    currentPage++;
+    paginate();
+  }
+
+  function prevPage() {
+    currentPage--;
+    paginate();
+  }
+
+  window.onload = paginate;
+</script>
+
+<script>
+  const itemsPerPage = 5;
+  let currentPage = 1;
+
+  function paginate() {
+    const items = document.querySelectorAll('.checkbox-item');
+    const totalItems = items.length;
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+    items.forEach((item, index) => {
+      item.style.display = (index >= (currentPage - 1) * itemsPerPage && index < currentPage * itemsPerPage) ? 'block' : 'none';
+    });
+
+    document.getElementById('prev-page-empresa-operadora').style.display = (currentPage === 1) ? 'none' : 'inline';
+    document.getElementById('next-page-empresa-operadora').style.display = (currentPage === totalPages) ? 'none' : 'inline';
+  }
+
+  function nextPage() {
+    currentPage++;
+    paginate();
+  }
+
+  function prevPage() {
+    currentPage--;
+    paginate();
+  }
+
+  window.onload = paginate;
+</script>
+
+<!-- jQuery -->
+<script src="{% static 'plugins/jquery/jquery.min.js' %}"></script>
+<!-- Bootstrap 4 -->
+<script src="{% static 'plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+<!-- AdminLTE App -->
+<script src="{% static 'dist/js/adminlte.min.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+{% load static %}
+<div class="sidebar">
+  <!-- Sidebar user panel (optional) -->
+  <div class="mb-3">
+  </div>
+
+  <!-- SidebarSearch Form -->
+<!--  para remover o destaque branco basta retirar a tag ative de active das urls relativas no menus suspensos-->
+  <!-- Sidebar Menu -->
+  <nav class="mt-2">
+    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+      <!--Catálogo de serviços-->
+      <li class="nav-item">
+        <a href="#" class="nav-link">
+          <i class="nav-icon fas fa-edit"></i>
+          <p>
+            Chats
+            <i class="right fas fa-angle-left"></i>
+          </p>
+        </a>
+        <ul class="nav nav-treeview">
+          {% if habilitar_jardinagem %}
+            <li class="nav-item">
+              <a href="{% url 'catalogo_de_servicos_jardinagem' userid %}" class="nav-link active">
+                <i class="far fa-circle nav-icon"></i>
+                <p>Jardinagem</p>
+              </a>
+            </li>
+          {% endif %}
+          {% if habilitar_limpeza %}
+            <li class="nav-item">
+              <a href="{% url 'catalogo_de_servicos_limpeza_predial' userid %}" class="nav-link active">
+                <i class="far fa-circle nav-icon"></i>
+                <p>Limpeza predial</p>
+              </a>
+            </li>
+          {% endif %}
+        </ul>
+      </li>
+
+      <!--Serviços agendados-->
+      <li class="nav-item">
+        <a href="#" class="nav-link">
+          <i class="nav-icon fas fa-edit"></i>
+          <p>
+            Novo chat
+            <i class="right fas fa-angle-left"></i>
+          </p>
+        </a>
+        <ul class="nav nav-treeview">
+          {% if habilitar_jardinagem %}
+            <li class="nav-item">
+              <a href="{% url 'servicos_agendados_jardinagem' userid %}" class="nav-link active">
+                <i class="far fa-circle nav-icon"></i>
+                <p>Jardinagem</p>
+              </a>
+            </li>
+          {% endif %}
+          {% if habilitar_limpeza %}
+            <li class="nav-item">
+              <a href="{% url 'servicos_agendados_limpeza_predial' userid %}" class="nav-link active">
+                <i class="far fa-circle nav-icon"></i>
+                <p>Limpeza predial</p>
+              </a>
+            </li>
+          {% endif %}
+        </ul>
+      </li>
+    </ul>
+  </nav>
+  <!-- /.sidebar-menu -->
+</div>

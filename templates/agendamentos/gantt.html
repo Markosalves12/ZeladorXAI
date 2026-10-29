@@ -1,0 +1,647 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-133LPT73ZQ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-133LPT73ZQ');
+  </script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title> {{ application }} | Gantt </title>
+  <link rel="shortcut icon" href="{% static 'dist/img/favicon-16x16.png' %}" />
+  <!-- Google Font: Source Sans Pro -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <!-- Font Awesome -->
+<!--  <link rel="stylesheet" href="{% static 'plugins/fontawesome-free/css/all.min.css' %}">-->
+  <!-- fullCalendar -->
+  <link rel="stylesheet" href="{% static 'plugins/fullcalendar/main.css' %}">
+  <!-- Theme style -->
+  <link rel="stylesheet" href="{% static 'dist/css/adminlte.min.css' %}">
+  {% include 'partials/_modern_theme.html' %}
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+  }
+
+  .gantt-container {
+    width: 90%;
+    margin: 20px auto;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    position: relative;
+    height: 600px; /* Altura fixa do contêiner */
+  }
+
+  .gantt-labels {
+    width: 150px;
+    border-right: 1px solid #ddd;
+    background-color: #f9f9f9;
+    flex-shrink: 0;
+    overflow-y: auto; /* Rolagem vertical para os rótulos */
+    position: sticky;
+    left: 0;
+    z-index: 5;
+    height: calc(100% - 50px); /* Ajusta altura para considerar o eixo fixo */
+  }
+
+  .gantt-labels .gantt-label {
+    height: 40px;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    font-size: 14px;
+    color: #333;
+    border-bottom: 1px solid #ddd;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .gantt-content {
+    flex: 1;
+    position: relative;
+    min-width: 600px;
+    display: flex;
+    flex-direction: column;
+    overflow-x: auto;
+    overflow-y: hidden; /* Evita rolagem vertical no contêiner principal */
+    cursor: grab;
+  }
+
+  .gantt-content.grabbing {
+    cursor: grabbing;
+  }
+
+  .gantt-body {
+    position: relative;
+    flex: 1;
+    overflow-y: auto; /* Rolagem vertical no corpo */
+    overflow-x: hidden;
+    min-width: 100%;
+  }
+
+  .gantt-axis {
+    padding: 10px 0;
+    border-top: 1px solid #ddd;
+    background-color: #f9f9f9;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+    height: 50px; /* Altura fixa do eixo */
+  }
+
+  .gantt-axis-item {
+    font-size: 12px;
+    color: #757575;
+    white-space: nowrap;
+    text-align: center;
+  }
+
+  .gantt-task {
+    position: absolute;
+    height: 30px;
+    background-color: #14a0b6;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 12px;
+    overflow: hidden;
+    transition: width 0.2s ease;
+    /* Removido: top: 50%; transform: translateY(-50%); */
+  }
+
+  .gantt-row {
+    height: 40px;
+    border-bottom: 1px solid #ddd;
+    position: relative;
+  }
+
+  .gantt-row:nth-child(odd) {
+    background-color: #fff;
+  }
+
+  .gantt-row:nth-child(even) {
+    background-color: rgba(221, 221, 221, 0.3);
+  }
+
+  .gantt-grid-line {
+    position: absolute;
+    width: 100%;
+    height: 1px;
+    background-color: #ddd;
+  }
+
+  .gantt-current-time-line {
+    position: absolute;
+    width: 1px;
+    height: 100%;
+    background-color: #999;
+    z-index: 10;
+    top: 0;
+  }
+
+  .zoom-controls {
+    margin-bottom: 10px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  @media (max-width: 768px) {
+    .gantt-container {
+      width: 100%;
+    }
+
+    .gantt-labels {
+      width: 120px;
+    }
+
+    .gantt-content {
+      min-width: 400px;
+    }
+  }
+</style>
+
+</head>
+<body class="hold-transition sidebar-mini">
+<div class="wrapper">
+  <!-- Navbar -->
+  <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+    <!-- Left navbar links -->
+    {% include 'partials/_right_sidebar_links.html' %}
+    <!-- Right navbar links -->
+    {% include 'partials/_right_sidebar.html' %}
+  </nav>
+  <!-- /.navbar -->
+
+  <!-- Main Sidebar Container -->
+  <aside class="main-sidebar sidebar-dark-primary elevation-4">
+    <!-- Brand Logo -->
+    {% include 'partials/_brand_logo.html' %}
+
+    <!-- Sidebar -->
+    {% include 'partials/_left_sidebar.html' %}
+    <!-- /.sidebar -->
+  </aside>
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    {% include 'partials/_left_sidebar_links.html' %}
+    <!-- Main content -->
+    <section class="content">
+      <div class="container-fluid">
+        {% include 'partials/_messages.html' %}
+        <div class="row">
+          <!-- /.col -->
+          <div class="col-md-12">
+            <div class="card card-primary">
+              <div class="card-body p-0">
+                <!-- THE CALENDAR -->
+                {% if permission_view %}
+                    {% if sform_search %}
+                      <form action="{{ redirect_url_name }}" method="GET" enctype="multipart/form-data">
+                        <div class="card-body d-flex justify-content-end">
+                          <div class="d-flex row g-3" style="gap: 15px;">
+                            <!-- Renderize apenas os campos específicos -->
+                            {% for field in form_search.visible_fields %}
+                              {% if field.name in allowed_fields %}
+                                <div class="d-flex flex-column" style="margin-right: 10px; text-align: center;">
+                                  <label for="{{ field.id_for_label }}" style="margin-bottom: 5px;">{{ field.label }}</label>
+                                  {{ field }}
+                                </div>
+                              {% endif %}
+                            {% endfor %}
+                            <div class="d-flex align-items-end">
+                              <button type="submit" class="btn btn-success">Buscar</button>
+                            </div>
+                            {% if permission_crate %}
+                              <div class="d-flex align-items-end">
+                                <a href="{% url url_agendamento 'gantt' userid %}">
+                                  <button type="button" class="btn btn-block btn-primary">Novo serviço</button>
+                                </a>
+                              </div>
+                            {% endif %}
+                          </div>
+                        </div>
+                      </form>
+                    {% endif %}
+                      <div>
+                        <div class="d-flex align-items-end zoom-controls">
+                          <a><button onclick="adjustZoom('out')" class="btn btn-block btn-default">Zoom Out</button></a>
+                          <a><button onclick="adjustZoom('in')" class="btn btn-block btn-default">Zoom In</button></a>
+                        </div>
+                        <div class="gantt-container">
+                          <div class="gantt-labels" id="gantt-labels"></div>
+                          <div class="gantt-content" id="gantt-content">
+                            <div class="gantt-body" id="gantt-body"></div>
+                            <div class="gantt-axis" id="gantt-axis"></div>
+                          </div>
+                        </div>
+                      </div>
+                {% else %}
+                  {% include 'partials/_access_rejected.html' %}
+                {% endif %}
+              </div>
+              <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+          </div>
+          <!-- /.col -->
+        </div>
+        <!-- /.row -->
+      </div><!-- /.container-fluid -->
+    </section>
+    <!-- /.content -->
+  </div>
+  <!-- /.content-wrapper -->
+  <div class="modal fade" id="modal-default" tabindex="-1" role="dialog" aria-labelledby="modal-default-label" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modal-default-label">Detalhes do Evento</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true"></span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <!-- Conteúdo do modal será preenchido pelo JavaScript -->
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/locale/pt-br.min.js"></script>
+  {% include 'partials/_footer.html' %}
+
+  <!-- Control Sidebar -->
+  <aside class="control-sidebar control-sidebar-dark">
+    <!-- Control sidebar content goes here -->
+  </aside>
+  <!-- /.control-sidebar -->
+</div>
+<!-- ./wrapper -->
+
+
+
+<!-- jQuery -->
+<script src="{% static 'plugins/jquery/jquery.min.js' %}"></script>
+<!-- Bootstrap -->
+<script src="{% static 'plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+<!-- jQuery UI -->
+<script src="{% static 'plugins/jquery-ui/jquery-ui.min.js' %}"></script>
+<!-- AdminLTE App -->
+<script src="{% static 'dist/js/adminlte.min.js' %}"></script>
+<!-- fullCalendar 2.2.5 -->
+<script src="{% static 'plugins/moment/moment.min.js' %}"></script>
+<script src="{% static 'plugins/fullcalendar/main.js' %}"></script>
+
+<!-- Adicionando Frappe Gantt -->
+<script>
+  const tasks = [
+    // Seus dados de tarefas aqui (mantidos iguais)
+    {% for event in formatted_events %}
+      {
+        id: '{{ event.id_random }}',
+        name: '{{ event.title }} {{ event.status_agendamento }}',
+        start: new Function('return new Date({{ event.start }})')(),
+        end: new Function('return new Date({{ event.end }})')(),
+        status: '{{ event.status }}',
+        backgroundColor: '{{ event.backgroundColor }}',
+        borderColor: '{{ event.borderColor }}',
+        textColor: '{{ event.textColor }}',
+        dataconclusao: '{{ event.dataconclusao }}'
+      },
+    {% endfor %}
+  ];
+
+  let zoomFactor = 0.0001;
+  let isDragging = false;
+  let startX, scrollLeft;
+
+  function getPosition(date, minDate, maxDate, totalWidth) {
+    const startTime = minDate.getTime();
+    const endTime = maxDate.getTime();
+    const currentTime = date.getTime();
+    const totalTime = endTime - startTime;
+    return totalTime === 0 ? 0 : ((currentTime - startTime) / totalTime) * totalWidth;
+  }
+
+  function calculateTotalWidth(minDate, maxDate, zoomFactor) {
+    const totalTime = maxDate.getTime() - minDate.getTime();
+    return totalTime * zoomFactor;
+  }
+
+  function renderLabels(tasks) {
+    const ganttLabels = document.getElementById("gantt-labels");
+    ganttLabels.innerHTML = "";
+    tasks.forEach(task => {
+      const label = document.createElement("div");
+      label.classList.add("gantt-label");
+      label.textContent = task.name;
+      ganttLabels.appendChild(label);
+    });
+  }
+
+  function renderAxis(minDate, maxDate, totalWidth) {
+    const ganttAxis = document.getElementById("gantt-axis");
+    ganttAxis.innerHTML = "";
+    ganttAxis.style.width = `${totalWidth}px`;
+
+    const startTime = minDate.getTime();
+    const endTime = maxDate.getTime();
+    const totalTime = endTime - startTime;
+    const zoomLevel = totalWidth / totalTime;
+
+    let interval, formatOptions = { day: "2-digit", month: "2-digit", year: "numeric" };
+    const targetWidthPerItem = 100;
+
+    if (zoomLevel > 0.01) interval = 60 * 60 * 1000; // 1 hora
+    else if (zoomLevel > 0.001) interval = 24 * 60 * 60 * 1000; // 1 dia
+    else if (zoomLevel > 0.0001) interval = 7 * 24 * 60 * 60 * 1000; // 1 semana
+    else interval = 30 * 24 * 60 * 60 * 1000; // ~1 mês
+
+    const numIntervals = Math.max(1, Math.floor(totalWidth / targetWidthPerItem));
+    interval = totalTime / numIntervals;
+
+    for (let i = 0; i <= numIntervals; i++) {
+      const date = new Date(startTime + interval * i);
+      const axisItem = document.createElement("div");
+      axisItem.classList.add("gantt-axis-item");
+      axisItem.textContent = date.toLocaleString("pt-BR", formatOptions);
+      axisItem.style.width = `${totalWidth / numIntervals}px`;
+      ganttAxis.appendChild(axisItem);
+    }
+  }
+
+  function renderTasks(tasks, minDate, maxDate, totalWidth) {
+    const ganttBody = document.getElementById("gantt-body");
+    ganttBody.innerHTML = "";
+    ganttBody.style.width = `${totalWidth}px`;
+    ganttBody.style.height = `${tasks.length * 40}px`; // Altura dinâmica baseada no número de tarefas
+
+    tasks.forEach((task, index) => {
+      const row = document.createElement("div");
+      row.classList.add("gantt-row");
+      row.style.width = `${totalWidth}px`;
+
+      if (index % 2 === 0) row.style.backgroundColor = "#fff";
+      else row.style.backgroundColor = "rgba(221, 221, 221, 0.3)";
+
+      const gridLine = document.createElement("div");
+      gridLine.classList.add("gantt-grid-line");
+      row.appendChild(gridLine);
+      ganttBody.appendChild(row);
+
+      const taskElement = document.createElement("div");
+      taskElement.classList.add("gantt-task");
+
+      const startPosition = getPosition(task.start, minDate, maxDate, totalWidth);
+      const endPosition = getPosition(task.end, minDate, maxDate, totalWidth);
+      const width = endPosition - startPosition;
+
+      const rowHeight = 40; // Altura fixa de cada linha
+      const taskHeight = 30; // Altura fixa da tarefa
+      const topOffset = (rowHeight - taskHeight) / 2; // Calcula o deslocamento para centralizar
+      taskElement.style.left = `${startPosition}px`;
+      taskElement.style.width = `${width}px`;
+      taskElement.style.top = `${index * rowHeight + topOffset}px`;
+      taskElement.style.backgroundColor = task.backgroundColor;
+      taskElement.style.borderColor = task.borderColor;
+      taskElement.style.color = task.textColor;
+
+      const taskLabel = document.createElement("div");
+      taskLabel.textContent = task.name;
+      taskLabel.style.fontSize = "12px";
+      taskLabel.style.padding = "5px";
+      taskElement.appendChild(taskLabel);
+
+      ganttBody.appendChild(taskElement);
+
+      // Adicionar evento de clique na tarefa
+      taskElement.addEventListener("click", function () {
+        const modal = $("#modal-default");
+        const modalTitle = modal.find(".modal-title");
+        const modalBody = modal.find(".modal-body");
+
+        // URLs baseadas no padrão do FullCalendar
+        const editUrl = "{% url url_edicao userid '__id__' %}".replace("__id__", task.id);
+        const acompUrl = "{% url url_acompanhamento 'gantt' userid '__id__' %}".replace("__id__", task.id);
+        const cancelUrl = "{% url url_cancelamento userid '__id__' 'gantt' %}".replace("__id__", task.id);
+        const concluirUrl = "{% url url_conclusao userid '__id__' 'gantt' %}".replace("__id__", task.id);
+        const detailingUrl = "{% url url_detalhamento userid '__id__' %}".replace("__id__", task.id);
+        const detailingChecklist = "{% url url_checklist userid '__id__' %}".replace("__id__", task.id);
+        const status = task.status;
+
+        const formattedStart = moment(task.start).format("dddd DD/MM/YYYY HH:mm");
+        const formattedEnd = moment(task.end).format("dddd DD/MM/YYYY HH:mm");
+
+        modalTitle.text(task.name);
+
+        // Define o conteúdo do modal com base no status
+        let modalContent = "";
+        let modalFooter = `
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+        `;
+
+        if (status === "Cancelado") {
+          modalContent = `
+            <p><strong>Status:</strong> ${status}</p>
+          `;
+        } else if (status === "Concluido") {
+          const completionDate = moment(task.dataconclusao).format("dddd DD/MM/YYYY HH:mm");
+          modalContent = `
+            <p><strong>Status:</strong> ${status}</p>
+            <p><strong>Data de Conclusão:</strong> ${completionDate}</p>
+            <p><a href="${detailingChecklist}">Checklist</a></p>
+            <p><a href="${detailingUrl}">Detalhamento</a></p>
+          `;
+        } else if (status === "Em andamento") {
+          modalContent = `
+            <p><strong>Início:</strong> ${formattedStart}</p>
+            <p><strong>Fim:</strong> ${formattedEnd}</p>
+            {% if permission_edit %}
+              <p><a href="${editUrl}">Editar evento</a></p>
+            {% endif %}
+            {% if permission_accompany %}
+              <p><a href="${acompUrl}">Acompanhar evento</a></p>
+            {% endif %}
+            <p><a href="${detailingChecklist}">Checklist</a></p>
+            <p><a href="${detailingUrl}">Detalhamento</a></p>
+          `;
+          {% if permission_acompleshed %}
+            modalFooter += `
+              <button type="button" class="btn btn-success" id="concluir-button">Concluir</button>
+            `;
+          {% endif %}
+        } else {
+          modalContent = `
+            <p><strong>Início:</strong> ${formattedStart}</p>
+            <p><strong>Fim:</strong> ${formattedEnd}</p>
+            {% if permission_edit %}
+              <p><a href="${editUrl}">Editar evento</a></p>
+            {% endif %}
+            <p><a href="${acompUrl}">Acompanhar evento</a></p>
+            <p><a href="${detailingChecklist}">Checklist</a></p>
+            <p><a href="${detailingUrl}">Detalhamento</a></p>
+          `;
+          modalFooter += `
+            {% if permission_cancel %}
+              <button type="button" class="btn btn-danger" id="cancel-button">Cancelar</button>
+            {% endif %}
+          `;
+        }
+
+        modalBody.html(`
+          ${modalContent}
+          <div class="modal-footer">
+            ${modalFooter}
+          </div>
+        `);
+
+        // Eventos dos botões
+        if (status !== "Em andamento") {
+          modalBody.find("#cancel-button").on("click", function () {
+            window.location.href = cancelUrl;
+          });
+        }
+
+        if (status === "Em andamento") {
+          modalBody.find("#concluir-button").on("click", function () {
+            window.location.href = concluirUrl;
+          });
+        }
+
+        modal.modal("show");
+      });
+    });
+  }
+
+  function renderGantt(tasks) {
+    const dates = tasks.flatMap(task => [task.start, task.end]);
+    const minDate = new Date(Math.min(...dates));
+    const maxDate = new Date(Math.max(...dates));
+    const totalWidth = calculateTotalWidth(minDate, maxDate, zoomFactor);
+
+    renderLabels(tasks);
+    renderAxis(minDate, maxDate, totalWidth);
+    renderTasks(tasks, minDate, maxDate, totalWidth);
+
+    const ganttBody = document.getElementById("gantt-body");
+    const currentTime = new Date();
+    const currentPosition = getPosition(currentTime, minDate, maxDate, totalWidth);
+    if (currentTime >= minDate && currentTime <= maxDate) {
+      const timeLine = document.createElement("div");
+      timeLine.classList.add("gantt-current-time-line");
+      timeLine.style.left = `${currentPosition}px`;
+      ganttBody.appendChild(timeLine);
+    }
+
+    const ganttContent = document.getElementById("gantt-content");
+    const ganttAxis = document.getElementById("gantt-axis");
+    const ganttLabels = document.getElementById("gantt-labels");
+
+    // Sincronizar rolagem horizontal
+    ganttContent.onscroll = () => {
+      requestAnimationFrame(() => {
+        ganttAxis.scrollLeft = ganttContent.scrollLeft;
+      });
+    };
+
+    // Sincronizar rolagem vertical entre gantt-body e gantt-labels
+    ganttBody.onscroll = () => {
+      requestAnimationFrame(() => {
+        ganttLabels.scrollTop = ganttBody.scrollTop;
+      });
+    };
+  }
+
+  function adjustZoom(direction, mouseX = null) {
+    const ganttContent = document.getElementById("gantt-content");
+    const oldScrollLeft = ganttContent.scrollLeft;
+    const oldWidth = calculateTotalWidth(
+      new Date(Math.min(...tasks.flatMap(t => [t.start, t.end]))),
+      new Date(Math.max(...tasks.flatMap(t => [t.start, t.end]))),
+      zoomFactor
+    );
+
+    const zoomMultiplier = 1.2;
+    if (direction === "in") zoomFactor *= zoomMultiplier;
+    else if (direction === "out") zoomFactor /= zoomMultiplier;
+
+    const newWidth = calculateTotalWidth(
+      new Date(Math.min(...tasks.flatMap(t => [t.start, t.end]))),
+      new Date(Math.max(...tasks.flatMap(t => [t.start, t.end]))),
+      zoomFactor
+    );
+
+    if (mouseX !== null) {
+      const mousePositionRelative = (mouseX + oldScrollLeft) / oldWidth;
+      ganttContent.scrollLeft = mousePositionRelative * newWidth - mouseX;
+    } else {
+      const centerRatio = (oldScrollLeft + ganttContent.clientWidth / 2) / oldWidth;
+      ganttContent.scrollLeft = centerRatio * newWidth - ganttContent.clientWidth / 2;
+    }
+
+    renderGantt(tasks);
+  }
+
+  // Zoom com roda do mouse
+  document.querySelector(".gantt-content").addEventListener("wheel", (e) => {
+    e.preventDefault();
+    const mouseX = e.clientX - e.target.getBoundingClientRect().left;
+    adjustZoom(e.deltaY < 0 ? "in" : "out", mouseX);
+  });
+
+  // Pan com mouse
+  const ganttContent = document.getElementById("gantt-content");
+  ganttContent.addEventListener("mousedown", (e) => {
+    isDragging = true;
+    ganttContent.classList.add("grabbing");
+    startX = e.pageX - ganttContent.offsetLeft;
+    scrollLeft = ganttContent.scrollLeft;
+  });
+
+  ganttContent.addEventListener("mouseleave", () => {
+    isDragging = false;
+    ganttContent.classList.remove("grabbing");
+  });
+
+  ganttContent.addEventListener("mouseup", () => {
+    isDragging = false;
+    ganttContent.classList.remove("grabbing");
+  });
+
+  ganttContent.addEventListener("mousemove", (e) => {
+    if (!isDragging) return;
+    e.preventDefault();
+    const x = e.pageX - ganttContent.offsetLeft;
+    const walk = (x - startX) * 1;
+    ganttContent.scrollLeft = scrollLeft - walk;
+  });
+
+  // Renderiza o gráfico inicialmente
+  renderGantt(tasks);
+</script>
+
+
+</body>
+</html>

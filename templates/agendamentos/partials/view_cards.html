@@ -1,0 +1,40 @@
+{% load static %}
+<div class="card-body">
+    <div class="card-body">
+      <p>
+        <b>Área para ser atendida:</b> {{ event.Areas }} ({{ event.Areas.dimensao }} M²)
+      </p>
+      <p>
+        <b>Inicia em:</b> {{ event.DataDeInicio }}<br>
+        <b>Finaliza em:</b> {{ event.DataDeConclusao }}<br>
+      </p>
+      <p>
+        <b>Serviços planejados:</b>
+        {% for servico in event.ServicosEscalados.all %}
+            {{ servico }},
+        {% endfor %}
+      </p>
+      <p>
+        <b>Colaboradores escalados:</b>
+        {% for servico in event.ColaboradoresEscalados.all %}
+            {{ servico }},
+        {% endfor %}
+      </p>
+    </div>
+</div>
+<div class="modal fade" id="modal-default" tabindex="-1" role="dialog" aria-labelledby="modal-default-label" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-default-label">{{ event.DescricaoDoServico }}</h5> <!-- O título será preenchido -->
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p><b>Início:</b>{{ event.DataDeInicio }}</p>
+                <p><b>Fim:</b>{{ event.DataDeConclusao }}</p>
+            </div>
+        </div>
+    </div>
+</div>

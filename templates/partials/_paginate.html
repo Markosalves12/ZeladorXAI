@@ -1,0 +1,30 @@
+{% load static %}
+<div class="card-footer">
+  <nav aria-label="Contacts Page Navigation">
+    <ul class="pagination justify-content-center m-0">
+      {% if dados_paginados.has_previous %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ dados_paginados.previous_page_number }}" aria-label="Previous">
+            <span aria-hidden="true">&laquo;</span>
+          </a>
+        </li>
+      {% endif %}
+
+      {% for num in dados_paginados.paginator.page_range %}
+        {% if dados_paginados.number == num %}
+          <li class="page-item active"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+        {% else %}
+          <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+        {% endif %}
+      {% endfor %}
+
+      {% if dados_paginados.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ dados_paginados.next_page_number }}" aria-label="Next">
+            <span aria-hidden="true">&raquo;</span>
+          </a>
+        </li>
+      {% endif %}
+    </ul>
+  </nav>
+</div>

@@ -1,0 +1,101 @@
+{% load static %}
+{% load custom_filters %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZeladorX</title>
+</head>
+<body>
+    <div style="text-align: center;">
+        <p style="font-size: 22px; color: #5b5b5b; font-family: Arial, sans-serif; font-weight: bold;">ZeladorX</p>
+    </div>
+    {% if n_dados > 0 %}
+        {{ cabecalho | safe }}
+        <div style="margin-top: 20px; text-align: center; font-family: Arial, sans-serif; font-size: 13px;">
+            <table style="width: 100%; border-collapse: collapse; border: 1px solid #ccc; font-size: 12px;">
+                <thead style="background-color: #f0f0f0;">
+                    <tr>
+                        {% for coluna in colunas %}
+                            <th style="padding: 6px; border: 1px solid #ccc; width: {{ coluna.largura }};">{{ coluna.label }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for dado in dados_paginados %}
+                        <tr style="border: 1px solid #ccc;">
+                            {% for coluna in colunas %}
+                                {% if coluna.nome == 'ServicosEscalados' %}
+                                    <td style="padding: 6px; border: 1px solid #ccc;">
+                                        {% for servico in dado.ServicosEscalados.all %}
+                                            {{ servico }}<br>
+                                        {% endfor %}
+                                    </td>
+                                {% elif coluna.nome == 'ColaboradoresEscalados' %}
+                                    <td style="padding: 6px; border: 1px solid #ccc;">
+                                        {% for colaborador in dado.ColaboradoresEscalados.all %}
+                                            {{ colaborador }}<br>
+                                        {% endfor %}
+                                    </td>
+                                {% elif coluna.nome == 'novo_status' %}
+                                    {% if dado|get_item:coluna.nome == "Próximo" %}
+                                        <td style="padding: 6px; border: 1px solid #ccc; background-color: #ffd700; color: #333;">
+                                            {{ dado|get_item:coluna.nome }}
+                                        </td>
+                                    {% elif dado|get_item:coluna.nome == "Em andamento" %}
+                                        <td style="padding: 6px; border: 1px solid #ccc; background-color: #5cb85c; color: #fff;">
+                                            {{ dado|get_item:coluna.nome }}
+                                        </td>
+                                    {% elif dado|get_item:coluna.nome == "Agendado" %}
+                                        <td style="padding: 6px; border: 1px solid #ccc; background-color: #5bc0de; color: #fff;">
+                                            {{ dado|get_item:coluna.nome }}
+                                        </td>
+                                    {% elif dado|get_item:coluna.nome == "Atrasado" %}
+                                        <td style="padding: 6px; border: 1px solid #ccc; background-color: #d9534f; color: #fff;">
+                                            {{ dado|get_item:coluna.nome }}
+                                        </td>
+                                    {% else %}
+                                        <td style="padding: 6px; border: 1px solid #ccc;">
+                                            {{ dado|get_item:coluna.nome }}
+                                        </td>
+                                    {% endif %}
+                                {% elif coluna.nome == 'dias_restantes' %}
+                                    {% if dado.Periodicidade == "Quinzenal" and dado.dias_restantes > 3 or dado.Periodicidade == "Mensal" and dado.dias_restantes > 7 or dado.Periodicidade == "Bimestral" and dado.dias_restantes > 15 or dado.Periodicidade == "Trimestral" and dado.dias_restantes > 15 or dado.Periodicidade == "Semestral" and dado.dias_restantes > 20 or dado.Periodicidade == "Anual" and dado.dias_restantes > 30 %}
+                                        <td style="padding: 6px; border: 1px solid #ccc; background-color: #5bc0de; color: #fff;">
+                                            {{ dado.dias_restantes }}
+                                        </td>
+                                    {% elif dado.Periodicidade == "Quinzenal" and dado.dias_restantes <= 3 and dado.dias_restantes >= 0 or dado.Periodicidade == "Mensal" and dado.dias_restantes <= 7 and dado.dias_restantes >= 0 or dado.Periodicidade == "Bimestral" and dado.dias_restantes <= 15 and dado.dias_restantes >= 0 or dado.Periodicidade == "Trimestral" and dado.dias_restantes <= 15 and dado.dias_restantes >= 0 or dado.Periodicidade == "Semestral" and dado.dias_restantes <= 20 and dado.dias_restantes >= 0 or dado.Periodicidade == "Anual" and dado.dias_restantes <= 30 and dado.dias_restantes >= 0 %}
+                                        <td style="padding: 6px; border: 1px solid #ccc; background-color: #ffd700; color: #333;">
+                                            {{ dado.dias_restantes }}
+                                        </td>
+                                    {% elif dado.dias_restantes < 0 %}
+                                        <td style="padding: 6px; border: 1px solid #ccc; background-color: #d9534f; color: #fff;">
+                                            {{ dado.dias_restantes }}
+                                        </td>
+                                    {% else %}
+                                        <td>
+                                            <span>
+                                                {{ dado.Periodicidade }}
+                                            </span>
+                                        </td>
+                                    {% endif %}
+                                {% else %}
+                                    <td style="padding: 6px; border: 1px solid #ccc;">
+                                        {{ dado|get_item:coluna.nome }}
+                                    </td>
+                                {% endif %}
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        {{ rodape | safe }}
+    {% endif %}
+    <p style="margin-top: 20px; font-size: 12px; color: #888;">
+        Este é um e-mail automático. Por favor, não responda diretamente a esta mensagem.
+    </p>
+</body>
+</html>

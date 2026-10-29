@@ -1,0 +1,387 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-133LPT73ZQ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-133LPT73ZQ');
+  </script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ application }} | Dashboard</title>
+  <link rel="shortcut icon" href="{% static 'dist/img/favicon-16x16.png' %}" />
+  <!-- Google Font: Source Sans Pro -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <!-- Font Awesome -->
+<!--  <link rel="stylesheet" href="{% static 'plugins/fontawesome-free/css/all.min.css' %}">-->
+  <!-- Ionicons -->
+  <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+  <!-- Tempusdominus Bootstrap 4 -->
+  <link rel="stylesheet" href="{% static 'plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css' %}">
+  <!-- iCheck -->
+  <link rel="stylesheet" href="{% static 'plugins/icheck-bootstrap/icheck-bootstrap.min.css' %}">
+  <!-- JQVMap -->
+  <link rel="stylesheet" href="{% static 'plugins/jqvmap/jqvmap.min.css' %}">
+  <!-- Theme style -->
+  <link rel="stylesheet" href="{% static 'dist/css/adminlte.min.css' %}">
+  {% include 'partials/_modern_theme.html' %}
+  <!-- overlayScrollbars -->
+  <link rel="stylesheet" href="{% static 'plugins/overlayScrollbars/css/OverlayScrollbars.min.css' %}">
+  <!-- Daterange picker -->
+  <link rel="stylesheet" href="{% static 'plugins/daterangepicker/daterangepicker.css' %}">
+  <!-- summernote -->
+  <link rel="stylesheet" href="{% static 'plugins/summernote/summernote-bs4.min.css' %}">
+</head>
+<body class="hold-transition sidebar-mini layout-fixed zx-dashboard-page">
+<div class="wrapper">
+
+  <!-- Preloader -->
+  <div class="preloader flex-column justify-content-center align-items-center">
+    <img class="animation__shake" src="{% static 'dist/img/logo alt.png' %}" alt="AdminLTELogo" height="60" width="60">
+  </div>
+
+  <!-- Navbar -->
+  <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+    <!-- Left navbar links -->
+    {% include 'partials/_right_sidebar_links.html' %}
+    <!-- Right navbar links -->
+    {% include 'partials/_right_sidebar.html' %}
+  </nav>
+  <!-- /.navbar -->
+
+  <!-- Main Sidebar Container -->
+  <aside class="main-sidebar sidebar-dark-primary elevation-4">
+    <!-- Brand Logo -->
+    {% include 'partials/_brand_logo.html' %}
+
+    <!-- Sidebar -->
+    {% include 'partials/_left_sidebar.html' %}
+    <!-- /.sidebar -->
+  </aside>
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    {% include 'partials/_left_sidebar_links.html' %}
+
+    <!-- Main content -->
+    <section class="content zx-dashboard-content">
+      <div class="container-fluid zx-dashboard-shell">
+        {% if permission_view %}
+          {% include 'partials/_form_search.html' %}
+          <!-- Indicadores principais -->
+          <div class="row zx-kpi-grid">
+            <div class="col-lg-3 col-6">
+              <!-- small box -->
+              <div class="small-box bg-info">
+                <div class="inner">
+                  <h3>{{ agendamentos }}</h3>
+                  <p>Serviços agendados</p>
+                </div>
+                <a href="#" class="small-box-footer">Visão consolidada <i class="fas fa-chart-line" aria-hidden="true"></i></a>
+              </div>
+            </div>
+            <!-- ./col -->
+            <div class="col-lg-3 col-6">
+              <!-- small box -->
+              <div class="small-box bg-success">
+                <div class="inner">
+                  <h3>{{ em_andamento }}<sup style="font-size: 20px"></sup></h3>
+                  <p>Serviços em andamento</p>
+                </div>
+                <a href="#" class="small-box-footer">Visão consolidada <i class="fas fa-chart-line" aria-hidden="true"></i></a>
+              </div>
+            </div>
+            <!-- ./col -->
+            <div class="col-lg-3 col-6">
+              <!-- small box -->
+              <div class="small-box bg-warning">
+                <div class="inner">
+                  <h3>{{ proximos }}</h3>
+                  <p>Serviços próximos</p>
+                </div>
+                <a href="#" class="small-box-footer">Visão consolidada <i class="fas fa-chart-line" aria-hidden="true"></i></a>
+              </div>
+            </div>
+            <!-- ./col -->
+            <div class="col-lg-3 col-6">
+              <!-- small box -->
+              <div class="small-box bg-danger">
+                <div class="inner">
+                  <h3>{{ atrasados }}</h3>
+                  <p>Serviços atrasados</p>
+                </div>
+                <a href="#" class="small-box-footer">Visão consolidada <i class="fas fa-chart-line" aria-hidden="true"></i></a>
+              </div>
+            </div>
+          </div>
+          <div class="row zx-chart-grid">
+            {% if por_terreno %}
+              <section class="col-lg-6 connectedSortable">
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title">
+                    <i class="fas fa-chart-pie mr-1"></i>
+                    Serviços por terrenos
+                  </h3>
+                  <div class="card-tools">
+                    <ul class="nav nav-pills ml-auto">
+                      <li class="nav-item">
+                        <a class="nav-link active" href="#revenue-chart" data-toggle="tab">Agendado</a>
+                      </li>
+                      <li class="nav-item">
+                        <a class="nav-link" href="#sales-chart" data-toggle="tab">Em andamento</a>
+                      </li>
+                      <li class="nav-item">
+                        <a class="nav-link" href="#sales-chart2" data-toggle="tab">Próximo</a>
+                      </li>
+                      <li class="nav-item">
+                        <a class="nav-link" href="#sales-chart3" data-toggle="tab">Atrasado</a>
+                      </li>
+                    </ul>
+                  </div>
+                </div><!-- /.card-header -->
+                <div class="card-body">
+                  <div class="tab-content p-0">
+                    <!-- Morris chart - Sales -->
+                    <div class="chart tab-pane active" id="revenue-chart" style="position: relative; max-height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px;">
+                      {{ fig_area_terreno_agendados | safe }}
+                     </div>
+                    <div class="chart tab-pane" id="sales-chart" style="position: relative; max-height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px;">
+                      {{ fig_area_terreno_em_andamento | safe }}
+                    </div>
+                    <div class="chart tab-pane" id="sales-chart2" style="position: relative; max-height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px;">
+                      {{ fig_area_terreno_proximo | safe }}
+                    </div>
+                    <div class="chart tab-pane" id="sales-chart3" style="position: relative; max-height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px;">
+                      {{ fig_area_terreno_atrasado | safe }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+            {% endif %}
+            <section class="col-lg-6 connectedSortable">
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title">
+                    <i class="fas fa-chart-pie mr-1"></i>
+                    Serviços por localidade
+                  </h3>
+                  <div class="card-tools">
+                    <ul class="nav nav-pills ml-auto">
+                      <li class="nav-item">
+                        <a class="nav-link active" href="#servicolocalidade-agendado" data-toggle="tab">Agendado</a>
+                      </li>
+                      <li class="nav-item">
+                        <a class="nav-link" href="#servicolocalidade-emandamento" data-toggle="tab">Em andamento</a>
+                      </li>
+                      <li class="nav-item">
+                        <a class="nav-link" href="#servicolocalidade-proximo" data-toggle="tab">Próximo</a>
+                      </li>
+                      <li class="nav-item">
+                        <a class="nav-link" href="#servicolocalidade-atrasado" data-toggle="tab">Atrasado</a>
+                      </li>
+                    </ul>
+                  </div>
+                </div><!-- /.card-header -->
+                <div class="card-body">
+                  <div class="tab-content p-0">
+                    <!-- Morris chart - Sales -->
+                    <div class="chart tab-pane active" id="servicolocalidade-agendado" style="position: relative; max-height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px;">
+                        {{ fig_area_localidade_agendados | safe }}
+                     </div>
+                    <div class="chart tab-pane" id="servicolocalidade-emandamento" style="position: relative; max-height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px;">
+                      {{ fig_area_localidade_em_andamento | safe }}
+                    </div>
+                    <div class="chart tab-pane" id="servicolocalidade-proximo" style="position: relative; max-height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px;">
+                      {{ fig_area_localidade_proximo | safe }}
+                    </div>
+                    <div class="chart tab-pane" id="servicolocalidade-atrasado" style="position: relative; max-height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px;">
+                      {{ fig_area_localidade_atrasado | safe }}
+                    </div>
+                  </div>
+                </div><!-- /.card-body -->
+              </div>
+            </section>
+
+            <section class="col-lg-6 connectedSortable">
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title">
+                    <i class="fas fa-chart-pie mr-1"></i>
+                    Serviços por área
+                  </h3>
+                  <div class="card-tools">
+                    <ul class="nav nav-pills ml-auto">
+                      <li class="nav-item">
+                        <a class="nav-link active" href="#servicoarea-agendado" data-toggle="tab">Agendado</a>
+                      </li>
+                      <li class="nav-item">
+                        <a class="nav-link" href="#servicoarea-emandamento" data-toggle="tab">Em andamento</a>
+                      </li>
+                      <li class="nav-item">
+                        <a class="nav-link" href="#servicoarea-proximo" data-toggle="tab">Próximo</a>
+                      </li>
+                      <li class="nav-item">
+                        <a class="nav-link" href="#servicoarea-atrasado" data-toggle="tab">Atrasado</a>
+                      </li>
+                    </ul>
+                  </div>
+                </div><!-- /.card-header -->
+                <div class="card-body">
+                  <div class="tab-content p-0">
+                    <!-- Morris chart - Sales -->
+                    <div class="chart tab-pane active" id="servicoarea-agendado" style="position: relative; max-height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px;">
+                        {{ fig_area_area_agendados | safe }}
+                     </div>
+                    <div class="chart tab-pane" id="servicoarea-emandamento" style="position: relative; max-height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px;">
+                      {{ fig_area_area_em_andamento | safe }}
+                    </div>
+                    <div class="chart tab-pane" id="servicoarea-proximo" style="position: relative; max-height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px;">
+                      {{ fig_area_area_proximo | safe }}
+                    </div>
+                    <div class="chart tab-pane" id="servicoarea-atrasado" style="position: relative; max-height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px;">
+                      {{ fig_area_area_atrasado | safe }}
+                    </div>
+                  </div>
+                </div><!-- /.card-body -->
+              </div>
+              <!-- /.card -->
+            </section>
+
+            {% if por_colaborador %}
+              <section class="col-lg-6 connectedSortable">
+              <!-- Map card -->
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title">
+                    <i class="fas fa-chart-pie mr-1"></i>
+                    Serviços por colaborador
+                  </h3>
+                  <div class="card-tools">
+                    <ul class="nav nav-pills ml-auto">
+                      <li class="nav-item">
+                        <a class="nav-link active" href="#servicocolaborador-agendado" data-toggle="tab">Agendado</a>
+                      </li>
+                      <li class="nav-item">
+                        <a class="nav-link" href="#servicocolaborador-emandamento" data-toggle="tab">Em andamento</a>
+                      </li>
+                      <li class="nav-item">
+                        <a class="nav-link" href="#servicocolaborador-proximo" data-toggle="tab">Próximo</a>
+                      </li>
+                      <li class="nav-item">
+                        <a class="nav-link" href="#servicocolaborador-atrasado" data-toggle="tab">Atrasado</a>
+                      </li>
+                    </ul>
+                  </div>
+                </div><!-- /.card-header -->
+                <div class="card-body">
+                  <div class="tab-content p-0">
+                    <!-- Morris chart - Sales -->
+                    <div class="chart tab-pane active" id="servicocolaborador-agendado" style="position: relative; max-height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px;">
+                        {{ fig_area_colaborador_agendados | safe }}
+                     </div>
+                    <div class="chart tab-pane" id="servicocolaborador-emandamento" style="position: relative; max-height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px;">
+                      {{ fig_area_colaborador_em_andamento | safe }}
+                    </div>
+                    <div class="chart tab-pane" id="servicocolaborador-proximo" style="position: relative; max-height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px;">
+                      {{ fig_area_colaborador_proximo | safe }}
+                    </div>
+                    <div class="chart tab-pane" id="servicocolaborador-atrasado" style="position: relative; max-height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px;">
+                      {{ fig_area_colaborador_atrasado | safe }}
+                    </div>
+                  </div>
+                </div><!-- /.card-body -->
+              </div>
+              <!-- /.card -->
+            </section>
+            {% endif %}
+
+            <section class="col-lg-12 connectedSortable">
+              <!-- Map card -->
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title">
+                    <i class="fas fa-chart-pie mr-1"></i>
+                    Serviços por colaborador
+                  </h3>
+                </div><!-- /.card-header -->
+                <div class="card-body">
+                  <div class="tab-content p-0">
+                    <!-- Morris chart - Sales -->
+                    <div style="position: relative; max-height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px;">
+                      {{ fig_mes_html | safe }}
+                    </div>
+                  </div>
+                </div><!-- /.card-body -->
+              </div>
+              <!-- /.card -->
+            </section>
+            <!-- right col -->
+          </div>
+        {% else  %}
+          <div class="row">
+            <div class="col-md-12">
+              <div class="card">
+                <!-- /.card-header -->
+                <div class="card-body">
+                  {% include 'partials/_access_rejected.html' %}
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+        <!-- /.row (main row) -->
+      </div><!-- /.container-fluid -->
+    </section>
+    <!-- /.content -->
+  </div>
+  <!-- /.content-wrapper -->
+  {% include 'partials/_footer.html' %}
+
+  <!-- Control Sidebar -->
+  <aside class="control-sidebar control-sidebar-dark">
+    <!-- Control sidebar content goes here -->
+  </aside>
+  <!-- /.control-sidebar -->
+</div>
+<!-- ./wrapper -->
+
+<!-- jQuery -->
+<script src="{% static 'plugins/jquery/jquery.min.js' %}"></script>
+<!-- jQuery UI 1.11.4 -->
+<script src="{% static 'plugins/jquery-ui/jquery-ui.min.js' %}"></script>
+<!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
+<script>
+  $.widget.bridge('uibutton', $.ui.button)
+</script>
+<!-- Bootstrap 4 -->
+<script src="{% static 'plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+<!-- ChartJS -->
+<script src="{% static 'plugins/chart.js/Chart.min.js' %}"></script>
+<!-- Sparkline -->
+<script src="{% static 'plugins/sparklines/sparkline.js' %}"></script>
+<!-- JQVMap -->
+<script src="{% static 'plugins/jqvmap/jquery.vmap.min.js' %}"></script>
+<script src="{% static 'plugins/jqvmap/maps/jquery.vmap.usa.js' %}"></script>
+<!-- jQuery Knob Chart -->
+<script src="{% static 'plugins/jquery-knob/jquery.knob.min.js' %}"></script>
+<!-- daterangepicker -->
+<script src="{% static 'plugins/moment/moment.min.js"></script>
+<script src="{% static 'plugins/daterangepicker/daterangepicker.js' %}"></script>
+<!-- Tempusdominus Bootstrap 4 -->
+<script src="{% static 'plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js' %}"></script>
+<!-- Summernote -->
+<script src="{% static 'plugins/summernote/summernote-bs4.min.js' %}"></script>
+<!-- overlayScrollbars -->
+<script src="{% static 'plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js' %}"></script>
+<!-- AdminLTE App -->
+<script src="{% static 'dist/js/adminlte.js' %}"></script>
+</body>
+</html>

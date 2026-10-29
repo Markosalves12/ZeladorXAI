@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facilities Suzano - Jardinagem</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .header {
+            font-size: 25px;
+            color: #D3D3D3;
+            font-weight: bold;
+        }
+        .content {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #000;
+        }
+        .password {
+            font-size: 25px;
+            color: #8FBC8F;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 10px 5px;
+            font-size: 16px;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .accept-button {
+            background-color: #4CAF50;
+        }
+        .reject-button {
+            background-color: #f44336;
+        }
+        .edit-button {
+            background-color: #808080;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">ZELADOR X</div>
+        <div class="content">
+            <p style="font-size: 18px; color: #000; font-family: Arial, sans-serif;">
+                Novo serviço atribuido a `{{ colaborador_nome}} `<br>
+                {{ descricao }}<br>
+                Serviço de {{ servicos }} na área {{ area }} | {{ localidade }}, inicio em {{ data_inicio }}<br>
+                <br>
+                resumo da atividade:<br>
+                area: {{ area }}<br>
+                area M^2: {{ area_total }}<br>
+                localidade: {{ localidade }}<br>
+                servicos: {{ servicos }}<br>
+                inicio: {{ data_inicio }}<br>
+            <p>
+            <a href="{% url 'aceitar_servico' id_random id_random_colaborador %}" class="button accept-button" target="_blank">Aceitar</a>
+            <a href="" class="button reject-button" target="_blank">Rejeitar</a>
+            <a href="" class="button edit-button" target="_blank">Editar antes de aceitar</a>
+        </div>
+    </div>
+</body>
+</html>

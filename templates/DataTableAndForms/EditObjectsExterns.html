@@ -1,0 +1,336 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+{% include 'partials/_header.html' %}
+<body class="hold-transition sidebar-mini">
+<div class="wrapper">
+  <!-- Navbar -->
+  <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+    <!-- Left navbar links -->
+    {% include 'partials/_right_sidebar_links.html' %}
+
+    <!-- Right navbar links -->
+    {% include 'partials/_right_sidebar.html' %}
+  </nav>
+  <!-- /.navbar -->
+
+  <!-- Main Sidebar Container -->
+  <aside class="main-sidebar sidebar-dark-primary elevation-4">
+    <!-- Brand Logo -->
+    {% include 'partials/_brand_logo.html' %}
+
+    <!-- Sidebar -->
+    {% include 'partials/_left_sidebar.html' %}
+    <!-- /.sidebar -->
+  </aside>
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    {% include 'partials/_left_sidebar_links.html' %}
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="container-fluid">
+        {% include 'partials/_messages.html' %}
+        <div class="row">
+          <div class="col-md-12">
+            <div class="card">
+              <!-- /.card-header -->
+              {% if permission_edit or permission_accompany %}
+                <div class="card-body">
+                  <form action="{{ redirect_url_name }}" method="POST" enctype="multipart/form-data">
+                    <div class="card-body">
+                      <div class="form-group">
+                        {% csrf_token %}
+                          <div class="form-group">
+                            {% for field in forms.visible_fields %}
+                              <!-- Identifique o campo 'Permissions' para aplicar a lógica de paginação -->
+                              {% if field.name == 'Permissions' %}
+                                <div class="form-group">
+                                  <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+
+                                  <!-- Container com checkboxes paginados -->
+                                  <div id="checkbox-container">
+                                    {% for empresa in field %}
+                                      <div class="checkbox-item">
+                                        {{ empresa }}
+                                      </div>
+                                    {% endfor %}
+                                  </div>
+
+                                  <!-- Controles de paginação -->
+                                  <div id="pagination-controls">
+                                    <button type="button" id="prev-page" onclick="prevPage()" class="btn btn-info">Anterior</button>
+                                    <button type="button" id="next-page" onclick="nextPage()" class="btn btn-info">Proximo</button>
+                                  </div>
+                                </div>
+
+                              {% elif field.name == "foto" or field.name == "foto_solicitacao" or field.name == "foto_entrega" or field.name == "foto_comprovacao" %}
+                                <div class="form-group">
+                                  <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+
+                                  {{ field }}
+
+                                  {% if field.value %}
+                                    <div style="margin-top: 10px;">
+                                      <img src="{{ field.value.url }}" alt="{{ field.label }}" class="img-fluid">
+                                    </div>
+                                  {% endif %}
+                                </div>
+                              {% else %}
+                                <!-- Renderização normal para outros campos -->
+                                <div class="form-group">
+                                  <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                  {{ field }}
+                                </div>
+                              {% endif %}
+                            {% endfor %}
+                          </div>
+                      </div>
+                      <div class="modal-footer justify-content-between">
+                        <!-- Botão Fechar à esquerda -->
+                        <a href="{{ redirect_close_button }}">
+                          <button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button>
+                        </a>
+
+                        <!-- Botões agrupados à direita -->
+                        <div class="ml-auto">
+<!--                          <button type="POST" class="btn btn-primary">{{ text_button }}</button>-->
+                          {% if permission_desmobilize %}
+                              <a href="{{ url_desmobilize }}">
+                                <button type="button" class="btn btn-warning">Rejeitar</button>
+                              </a>
+                          {% endif %}
+                          {% if permission_rehabilitate %}
+                              <a href="{{ url_rehabilitate }}">
+                                <button type="button" class="btn btn-success">Aceitar</button>
+                              </a>
+                          {% endif %}
+                          {% if permission_exclude %}
+                            <a href="{{ url_if_delete }}">
+                              <button type="button" class="btn btn-danger">Excluir</button>
+                            </a>
+                          {% endif %}
+                        </div>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              {% else %}
+                {% include 'partials/_access_rejected.html' %}
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+    <!-- /.content -->
+  </div>
+  <!-- /.content-wrapper -->
+  {% include 'partials/_footer.html' %}
+
+  <!-- Control Sidebar -->
+  <aside class="control-sidebar control-sidebar-dark">
+    <!-- Control sidebar content goes here -->
+  </aside>
+  <!-- /.control-sidebar -->
+</div>
+<!-- ./wrapper -->
+
+<!-- jQuery -->
+<script src="{% static 'plugins/jquery/jquery.min.js' %}"></script>
+<!-- Bootstrap 4 -->
+<script src="{% static 'plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+<!-- SweetAlert2 -->
+<script src="{% static 'plugins/sweetalert2/sweetalert2.min.js' %}"></script>
+<!-- AdminLTE App -->
+<script src="{% static 'dist/js/adminlte.min.js' %}"></script>
+<!--&lt;!&ndash; AdminLTE for demo purposes &ndash;&gt;-->
+<!--<script src="{% static 'dist/js/demo.js' %}"></script>-->
+<script>
+  const itemsPerPage = 15;
+  let currentPage = 1;
+
+  function paginate() {
+    const items = document.querySelectorAll('.checkbox-item');
+    const totalItems = items.length;
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+    items.forEach((item, index) => {
+      item.style.display = (index >= (currentPage - 1) * itemsPerPage && index < currentPage * itemsPerPage) ? 'block' : 'none';
+    });
+
+    document.getElementById('prev-page').style.display = (currentPage === 1) ? 'none' : 'inline';
+    document.getElementById('next-page').style.display = (currentPage === totalPages) ? 'none' : 'inline';
+  }
+
+  function nextPage() {
+    currentPage++;
+    paginate();
+  }
+
+  function prevPage() {
+    currentPage--;
+    paginate();
+  }
+
+  window.onload = paginate;
+</script>
+
+<script>
+  $(function() {
+    var Toast = Swal.mixin({
+      toast: true,
+      position: 'top-end',
+      showConfirmButton: false,
+      timer: 3000
+    });
+
+    $('.swalDefaultSuccess').click(function() {
+      Toast.fire({
+        icon: 'success',
+        title: 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr.'
+      })
+    });
+    $('.swalDefaultInfo').click(function() {
+      Toast.fire({
+        icon: 'info',
+        title: 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr.'
+      })
+    });
+    $('.swalDefaultError').click(function() {
+      Toast.fire({
+        icon: 'error',
+        title: 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr.'
+      })
+    });
+    $('.swalDefaultWarning').click(function() {
+      Toast.fire({
+        icon: 'warning',
+        title: 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr.'
+      })
+    });
+    $('.swalDefaultQuestion').click(function() {
+      Toast.fire({
+        icon: 'question',
+        title: 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr.'
+      })
+    });
+
+    $('.toastrDefaultSuccess').click(function() {
+      toastr.success('Lorem ipsum dolor sit amet, consetetur sadipscing elitr.')
+    });
+    $('.toastrDefaultInfo').click(function() {
+      toastr.info('Lorem ipsum dolor sit amet, consetetur sadipscing elitr.')
+    });
+    $('.toastrDefaultError').click(function() {
+      toastr.error('Lorem ipsum dolor sit amet, consetetur sadipscing elitr.')
+    });
+    $('.toastrDefaultWarning').click(function() {
+      toastr.warning('Lorem ipsum dolor sit amet, consetetur sadipscing elitr.')
+    });
+
+    $('.toastsDefaultDefault').click(function() {
+      $(document).Toasts('create', {
+        title: 'Toast Title',
+        body: 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr.'
+      })
+    });
+    $('.toastsDefaultTopLeft').click(function() {
+      $(document).Toasts('create', {
+        title: 'Toast Title',
+        position: 'topLeft',
+        body: 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr.'
+      })
+    });
+    $('.toastsDefaultBottomRight').click(function() {
+      $(document).Toasts('create', {
+        title: 'Toast Title',
+        position: 'bottomRight',
+        body: 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr.'
+      })
+    });
+    $('.toastsDefaultBottomLeft').click(function() {
+      $(document).Toasts('create', {
+        title: 'Toast Title',
+        position: 'bottomLeft',
+        body: 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr.'
+      })
+    });
+    $('.toastsDefaultAutohide').click(function() {
+      $(document).Toasts('create', {
+        title: 'Toast Title',
+        autohide: true,
+        delay: 750,
+        body: 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr.'
+      })
+    });
+    $('.toastsDefaultNotFixed').click(function() {
+      $(document).Toasts('create', {
+        title: 'Toast Title',
+        fixed: false,
+        body: 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr.'
+      })
+    });
+    $('.toastsDefaultFull').click(function() {
+      $(document).Toasts('create', {
+        body: 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr.',
+        title: 'Toast Title',
+        subtitle: 'Subtitle',
+        icon: 'fas fa-envelope fa-lg',
+      })
+    });
+    $('.toastsDefaultFullImage').click(function() {
+      $(document).Toasts('create', {
+        body: 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr.',
+        title: 'Toast Title',
+        subtitle: 'Subtitle',
+        image: '../../dist/img/user3-128x128.jpg',
+        imageAlt: 'User Picture',
+      })
+    });
+    $('.toastsDefaultSuccess').click(function() {
+      $(document).Toasts('create', {
+        class: 'bg-success',
+        title: 'Toast Title',
+        subtitle: 'Subtitle',
+        body: 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr.'
+      })
+    });
+    $('.toastsDefaultInfo').click(function() {
+      $(document).Toasts('create', {
+        class: 'bg-info',
+        title: 'Toast Title',
+        subtitle: 'Subtitle',
+        body: 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr.'
+      })
+    });
+    $('.toastsDefaultWarning').click(function() {
+      $(document).Toasts('create', {
+        class: 'bg-warning',
+        title: 'Toast Title',
+        subtitle: 'Subtitle',
+        body: 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr.'
+      })
+    });
+    $('.toastsDefaultDanger').click(function() {
+      $(document).Toasts('create', {
+        class: 'bg-danger',
+        title: 'Toast Title',
+        subtitle: 'Subtitle',
+        body: 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr.'
+      })
+    });
+    $('.toastsDefaultMaroon').click(function() {
+      $(document).Toasts('create', {
+        class: 'bg-maroon',
+        title: 'Toast Title',
+        subtitle: 'Subtitle',
+        body: 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr.'
+      })
+    });
+  });
+</script>
+</body>
+</html>
