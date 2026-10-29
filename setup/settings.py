@@ -9,17 +9,57 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / '.env')
 def flag(name, default=False):
     return os.getenv(name, str(default)).lower() in ('true', '1', 'yes')
-SECRET_KEY = os.getenv('SECRET_KEY', '')
-if not SECRET_KEY:
-    raise ImproperlyConfigured('Configure SECRET_KEY com a mesma chave da família ZeladorX.')
+# Login compartilhado: mesma SECRET_KEY (e mesmo fallback) do ZeladorX, ChatChannels e Automações
+SECRET_KEY_PADRAO = 'django-insecure-t+_dily3s3qm+@4k()5@$g3t&2$=6dvz-#h01i%@3t(7*4*!si'
+SECRET_KEY = os.getenv('SECRET_KEY') or SECRET_KEY_PADRAO
 DEBUG = flag('DEBUG')
 ALLOWED_HOSTS = [v.strip() for v in os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',') if v.strip()]
 INSTALLED_APPS = [
-    'django.contrib.admin', 'django.contrib.auth', 'django.contrib.contenttypes',
-    'django.contrib.sessions', 'django.contrib.messages', 'django.contrib.staticfiles',
-    'zeladorx', 'empresaprimaria', 'empresasecundario', 'gerente', 'notifications',
-    'permissionscontrol', 'settings', 'semana', 'unidade', 'localidade', 'terrenos',
-    'vegetacao', 'catalogo_de_servicos', 'areas', 'servicos', 'ai_chat.apps.AiChatConfig',
+    # Django
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+
+    # Apps compartilhados (mesma lista e mesmos labels do zeladorxV2:
+    # garante migrações, content types e permissões idênticos no banco da família)
+    'areas.apps.AreasConfig',
+    'catalogo_de_servicos.apps.CatalogoDeServicosConfig',
+    'dashboards.apps.DashboardsConfig',
+    'empresaprimaria.apps.EmpresaprimariaConfig',
+    'empresasecundario.apps.EmpresasecundarioConfig',
+    'gerente.apps.GerenteConfig',
+    'localidade.apps.LocalidadeConfig',
+    'notifications.apps.NotificationsConfig',
+    'relatorios.apps.RelatoriosConfig',
+    'terrenos.apps.TerrenosConfig',
+    'unidade.apps.UnidadeConfig',
+    'utils.apps.UtilsConfig',
+    'vegetacao.apps.VegetacaoConfig',
+    'servicos.apps.ServicosConfig',
+    'settings.apps.SettingsConfig',
+    'schedules.apps.SchedulesConfig',
+    'semana.apps.SemanaConfig',
+    'authenticate.apps.AuthenticateConfig',
+    'permissionscontrol.apps.PermissionscontrolConfig',
+    'history.apps.HistoryConfig',
+    'zeladorx.apps.ZeladorxConfig',
+    'background_task',
+    'kanban.apps.KanbanConfig',
+    'checklists.apps.ChecklistsConfig',
+    'medidor.apps.MedidorConfig',
+    'gantt.apps.GanttConfig',
+    'mapas.apps.MapasConfig',
+    'retornos.apps.RetornosConfig',
+    'storages',
+    'rest_framework',
+    'rest_framework.authtoken',
+    'solicitacoes.apps.SolicitacoesConfig',
+
+    # App exclusivo do ZeladorX AI
+    'ai_chat.apps.AiChatConfig',
 ]
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware', 'whitenoise.middleware.WhiteNoiseMiddleware',
@@ -35,8 +75,8 @@ WSGI_APPLICATION = 'setup.wsgi.application'
 ASGI_APPLICATION = 'setup.asgi.application'
 DATABASES = {'default': dj_database_url.parse(os.environ['DATABASE_URL'], conn_max_age=60) if os.getenv('DATABASE_URL') else {
     'ENGINE': 'django.db.backends.postgresql', 'NAME': os.getenv('DB_NAME', 'zeladorx'),
-    'USER': os.getenv('DB_USER', 'postgres'), 'PASSWORD': os.getenv('DB_PASSWORD', ''),
-    'HOST': os.getenv('DB_HOST', '127.0.0.1'), 'PORT': os.getenv('DB_PORT', '5432')}}
+    'USER': os.getenv('DB_USER', 'postgres'), 'PASSWORD': os.getenv('DB_PASSWORD', 'PnCdEL'),
+    'HOST': os.getenv('DB_HOST', 'localhost'), 'PORT': os.getenv('DB_PORT', '5432')}}
 AUTH_USER_MODEL = 'gerente.Gerente'
 # Keep BOTH paths: existing family sessions store the backend's dotted path.
 AUTHENTICATION_BACKENDS = ['django.contrib.auth.backends.AllowAllUsersModelBackend', 'gerente.backends.CaseInsensitiveModelBackend']
