@@ -1,0 +1,10 @@
+# Dependências leves da plataforma AI; não instala a pilha de gráficos do app principal.
+Django>=5.1.4,<5.2
+python-dotenv>=1.0,<2
+dj-database-url>=2.3,<3
+psycopg2-binary>=2.9.10,<3
+Pillow>=11,<12
+requests>=2.32.3,<3
+whitenoise>=6.8,<7
+gunicorn>=23,<24
+mcp>=1.12,<2

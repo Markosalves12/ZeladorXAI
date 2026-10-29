@@ -11,3 +11,11 @@
 - Recolhimento da sidebar respeita `sidebar-collapse`/`sidebar-open` do AdminLTE e é persistido em localStorage (`zeladorx.sidebar.collapsed`).
 
 - Style the four management/admin dashboards through the `zx-dashboard-page` scope and render Plotly figures in the browser, because dashboard presentation must remain isolated from shared business logic and server-side chart rendering.
+
+## ZeladorX AI
+- Keep AI routes and integrations in ai_chat, with shared model files and migrations unchanged, because the family shares its business database.
+- Register split service model modules from AiChatConfig.ready, because shared apps do not define models.py and must not be modified here.
+- Use a single read-only, field-allowlisted tool boundary for both chat and stdio MCP, because model instructions are not authorization.
+- Bind MCP stdio to an operator-configured existing user and reload its access per call; never expose it as unauthenticated HTTP, because local process trust is not remote authentication.
+- Use LM Studio directly from Django and configure exact model IDs through the environment, because this platform targets local inference rather than a hosted provider.
+- Own AI styling in ai_chat/static/ai_chat with semantic CSS tokens, because AI presentation must not change shared templates.
