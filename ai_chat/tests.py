@@ -143,9 +143,36 @@ class AiAccessTests(TestCase):
         self.assertEqual(call.call_args[0][1]['messages'][-1]['role'],'tool')
 
     @patch('ai_chat.lmstudio.request_json')
-    def test_no_unverified_model_answer(self, call):
-        call.return_value={'choices':[{'message':{'content':'Existem 1000 serviços.'}}]}
-        with self.assertRaises(ModelError): answer(self.user,'Quantos?',[])
+    def test_model_without_tools_gets_real_data(self, call):
+        call.return_value={'choices':[{'message':{'content':'Resposta.'}}]}
+        result=answer(self.user,'Quais minhas permissões e macroserviços habilitados?',[])
+        perfil=result['fontes'][0]['resultado']
+        self.assertEqual(perfil['macroservicos_habilitados'],['Jardinagem','Limpeza predial'])
+        self.assertIn('322: Pode visualizar serviços agendados',perfil['permissoes']['jardinagem'])
+        self.assertNotIn('tools',call.call_args[0][1])
+        self.assertIn('Dados consultados',json.dumps(call.call_args[0][1]['messages'],ensure_ascii=False))
+
+    def test_generic_tables_scoped_and_unique(self):
+        other = EmpresaPrimaria.objects.create(nome='Outro',N_unidades=1); other.setor.add(self.j)
+        team = EmpresaSecundaria.objects.create(nome='Outro time',empresaprimaria=other); team.setor.add(self.j)
+        self.make_service(team)
+        team2 = EmpresaSecundaria.objects.create(nome='Time 2',empresaprimaria=self.primary); team2.setor.add(self.j)
+        self.user.empresasecundaria.add(team2); self.service.Areas.localidade.unidade.empresasecundaria.add(team2)
+        self.assertEqual(run_tool(self.user,'contar_tabela',{'tabela':'areas_jardinagem'})['total'],1)
+        self.assertEqual(run_tool(self.user,'consultar_tabela',{'tabela':'servicos_agendados_jardinagem'})['total'],1)
+        self.assertEqual(run_tool(self.user,'contar_tabela',{'tabela':'empresas_primarias'})['total'],1)
+
+    def test_generic_tables_require_permission_and_allowlist(self):
+        PermissionsAccessJardinagem.objects.filter(Gerente=self.user).delete()
+        with self.assertRaises(PermissionDenied): run_tool(self.user,'consultar_tabela',{'tabela':'areas_jardinagem'})
+        self.assertNotIn('areas_jardinagem',[t['tabela'] for t in run_tool(self.user,'listar_tabelas',{})['tabelas']])
+        with self.assertRaises(ValidationError): run_tool(self.user,'consultar_tabela',{'tabela':'gerente'})
+        with self.assertRaises(ValidationError): run_tool(self.user,'contar_tabela',{'tabela':'unidades','agrupar_por':'password'})
+
+    def test_every_catalog_table_queries(self):
+        for t in run_tool(self.user,'listar_tabelas',{})['tabelas']:
+            run_tool(self.user,'consultar_tabela',{'tabela':t['tabela'],'limite':5})
+            for g in t['agrupar_por']: run_tool(self.user,'contar_tabela',{'tabela':t['tabela'],'agrupar_por':g})
 
     @override_settings(LMSTUDIO_EMBED_MODEL='embedding-test')
     @patch('ai_chat.lmstudio.request_json')

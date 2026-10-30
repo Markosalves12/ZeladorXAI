@@ -41,4 +41,27 @@ class Command(BaseCommand):
             empresa: str = '', status: str = '', inicio: str = '', fim: str = '', busca: str = '') -> dict:
             """Conta serviços autorizados; inclui atrasados, sem truncamento de página."""
             return await asyncio.to_thread(lambda: run_tool(user(), 'resumir_servicos', {'vertical': vertical, 'empresa': empresa, 'status': status, 'inicio': inicio, 'fim': fim, 'busca': busca}))
+        def clean(d):
+            return {k: v for k, v in d.items() if v not in ('', None)}
+        @server.tool(annotations=annotations)
+        async def meu_perfil() -> dict:
+            """Macroserviços habilitados, times, permissões e notificações do gerente configurado."""
+            return await asyncio.to_thread(lambda: run_tool(user(), 'meu_perfil', {}))
+        @server.tool(annotations=annotations)
+        async def listar_tabelas() -> dict:
+            """Tabelas da família ZeladorX que podem ser consultadas, com campos e agrupamentos."""
+            return await asyncio.to_thread(lambda: run_tool(user(), 'listar_tabelas', {}))
+        @server.tool(annotations=annotations)
+        async def consultar_tabela(tabela: str, empresa: str = '', status: str = '', busca: str = '',
+            inicio: str = '', fim: str = '', limite: int = 25, offset: int = 0) -> dict:
+            """Lista linhas de uma tabela permitida, somente leitura e sem duplicação."""
+            args = clean({'tabela': tabela, 'empresa': empresa, 'status': status, 'busca': busca, 'inicio': inicio, 'fim': fim})
+            return await asyncio.to_thread(lambda: run_tool(user(), 'consultar_tabela', {**args, 'limite': limite, 'offset': offset}))
+        @server.tool(annotations=annotations)
+        async def contar_tabela(tabela: str, agrupar_por: str = '', empresa: str = '', status: str = '',
+            busca: str = '', inicio: str = '', fim: str = '') -> dict:
+            """Conta linhas de uma tabela permitida, com agrupamento opcional."""
+            args = clean({'tabela': tabela, 'agrupar_por': agrupar_por, 'empresa': empresa, 'status': status,
+                'busca': busca, 'inicio': inicio, 'fim': fim})
+            return await asyncio.to_thread(lambda: run_tool(user(), 'contar_tabela', args))
         server.run(transport='stdio')

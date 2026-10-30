@@ -8,6 +8,7 @@ from empresasecundario.models import EmpresaSecundaria
 from permissionscontrol.models import PermissionsAccessJardinagem, PermissionsAccessLimpezaPredial
 from servicos.models_jardinagem import ServicoJardinagemAgendado
 from servicos.models_limpeza_predial import ServicoLimpezaPredialAgendado
+from . import catalog
 
 VERTICALS = {
     'jardinagem': (ServicoJardinagemAgendado, PermissionsAccessJardinagem, 'Jardinagem'),
@@ -107,6 +108,20 @@ def run_tool(user, name, arguments):
             unique = qs.model.objects.filter(pk__in=qs.values('pk'))
             return {'total': unique.count(), 'por_status': list(unique.order_by().values('status').annotate(total=Count('pk'))),
                 'atrasados': unique.filter(status='Agendado', DataDeInicio__lt=timezone.now()).count()}
+        if name == 'meu_perfil':
+            if arguments:
+                raise ValidationError('Esta ferramenta não recebe filtros.')
+            return catalog.profile(user, companies, can_read)
+        if name == 'listar_tabelas':
+            if arguments:
+                raise ValidationError('Esta ferramenta não recebe filtros.')
+            return catalog.list_tables(user, can_read)
+        if name in ('consultar_tabela', 'contar_tabela'):
+            allowed = catalog.FILTERS - ({'agrupar_por'} if name == 'consultar_tabela' else {'limite', 'offset'})
+            if set(arguments) - allowed:
+                raise ValidationError('Filtro não permitido.')
+            fn = catalog.query_table if name == 'consultar_tabela' else catalog.count_table
+            return fn(user, arguments, companies, can_read)
         raise ValidationError('Ferramenta não permitida.')
 
 PROPERTIES = {
@@ -125,4 +140,25 @@ TOOL_SPECS = [
             'offset': {'type': 'integer', 'minimum': 0, 'maximum': 10000}}, 'additionalProperties': False}}},
     {'type': 'function', 'function': {'name': 'resumir_servicos', 'description': 'Conta todos os serviços autorizados pelos filtros, sem truncar à página.',
         'parameters': {'type': 'object', 'properties': PROPERTIES, 'additionalProperties': False}}},
+]
+
+TABLE_ARGS = {
+    'tabela': {'type': 'string', 'enum': list(catalog.TABLES), 'description': 'Tabela do catálogo (veja listar_tabelas)'},
+    'empresa': PROPERTIES['empresa'],
+    'status': {'type': 'string', 'maxLength': 40},
+    'busca': PROPERTIES['busca'],
+    'inicio': PROPERTIES['inicio'], 'fim': PROPERTIES['fim'],
+}
+TOOL_SPECS += [
+    {'type': 'function', 'function': {'name': 'meu_perfil', 'description': 'Perfil do usuário atual: macroserviços habilitados, times, permissões e notificações. Use para perguntas sobre "minhas permissões", "o que tenho habilitado".',
+        'parameters': {'type': 'object', 'properties': {}, 'additionalProperties': False}}},
+    {'type': 'function', 'function': {'name': 'listar_tabelas', 'description': 'Lista todas as tabelas da família ZeladorX que o usuário pode consultar, com campos e agrupamentos.',
+        'parameters': {'type': 'object', 'properties': {}, 'additionalProperties': False}}},
+    {'type': 'function', 'function': {'name': 'consultar_tabela', 'description': 'Lista linhas de qualquer tabela permitida (unidades, localidades, áreas, catálogos, serviços, acompanhamentos, checklists, QR Codes, solicitações, terrenos, vegetações).',
+        'parameters': {'type': 'object', 'required': ['tabela'], 'properties': {**TABLE_ARGS,
+            'limite': {'type': 'integer', 'minimum': 1, 'maximum': 100}, 'offset': {'type': 'integer', 'minimum': 0, 'maximum': 10000}},
+            'additionalProperties': False}}},
+    {'type': 'function', 'function': {'name': 'contar_tabela', 'description': 'Conta linhas de uma tabela permitida, opcionalmente agrupando por um campo (ex.: status).',
+        'parameters': {'type': 'object', 'required': ['tabela'], 'properties': {**TABLE_ARGS,
+            'agrupar_por': {'type': 'string', 'description': 'Um dos agrupamentos de listar_tabelas'}}, 'additionalProperties': False}}},
 ]

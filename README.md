@@ -6,7 +6,9 @@ Plataforma Django da família ZeladorX para conversar com os dados de Jardinagem
 
 - Interface de conversa azul/verde, Sora/Manrope, lista lateral e consultas com fontes.
 - Login compartilhado com ZeladorX, ChatChannels e Automações. Usuário já autenticado vai para `/`.
-- Ferramentas `listar_empresas`, `listar_servicos` e `resumir_servicos`; filtros por vertical, empresa, período, status e descrição.
+- Ferramentas `meu_perfil` (macroserviços, times, permissões, notificações), `listar_tabelas`, `consultar_tabela`, `contar_tabela` (todas as tabelas de negócio da família: clientes, times, unidades, localidades, áreas, catálogos, serviços configurados/agendados, acompanhamentos, checklists, QR Codes, solicitações, terrenos e vegetações) e `listar_empresas`, `listar_servicos`, `resumir_servicos`.
+- Se o modelo não chamar ferramentas, o sistema consulta os dados automaticamente pela pergunta e pede ao modelo que responda só com esse resultado.
+- Nunca expostos: senhas, tokens de recuperação, arquivos e permissões de outros gerentes.
 - Consultas únicas pelo ID com `.distinct()`; resumos calculados sobre todos os IDs filtrados, não sobre uma página.
 - Permissão **322** separada por vertical; ausência de permissão bloqueia. Superusuário mantém escopo das empresas primárias às quais já está vinculado; não recebe acesso global.
 - Usuários inativos/desmobilizados e empresas desmobilizadas não são consultáveis.
